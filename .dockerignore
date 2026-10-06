@@ -1,0 +1,11 @@
+.git
+build
+install
+log
+.venv
+tmp
+**/__pycache__
+**/*.pyc
+.env
+
+assets/robocasa/.downloads

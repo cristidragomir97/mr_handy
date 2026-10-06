@@ -59,8 +59,8 @@ MuJoCo also exposes `/simulation/ground_truth_odom` for the floating base and
 
 The scene derives every joint origin, axis, bound, mesh and inertial from the
 same expanded URDF used by the controller manager. Axes are normalized by the
-physics engine. The base has a free joint; fixed URDF bodies are fused while
-preserving mass/inertia. Position servos use provisional proportional gains with
+physics engine. The base has a free joint; fixed URDF bodies are retained with their
+imported mass/inertia to preserve sensor attachment. Position servos use provisional proportional gains with
 MuJoCo mass-scaled critical damping; wheel actuators use velocity control.
 Tool coupling uses joint equalities plus provisional 0.0001 kg·m² reflected
 drive inertia and 0.002 N·m·s/rad damping to regularize its frame-only coupler.
@@ -75,8 +75,20 @@ this is simulated feedback, not exact command echo. Hardware torque, velocity,
 head range, lift drive and homing calibration are not established by these gains.
 
 Rosboard is imported from base101's existing package and started by bringup.
-It observes the graph over HTTP/WebSocket on port 8888. Its publishing allowlist permits Twist and TwistStamped for base teleoperation.
-The source single-arm slider mapping is not used for this robot.
+It observes the graph over HTTP/WebSocket on port 8888. Its publishing allowlist
+permits Twist and TwistStamped for base teleoperation, and JointTrajectory and
+Float64MultiArray for joint control.
+
+## Browser joint control
+
+Bringup generates `/rosboard/joint-controls` from the assembled URDF and selected
+controller mode. The slider panel uses this configuration for all 16 position
+axes, including both wrist-yaw joints. Mimic followers expose feedback only.
+
+In trajectory mode, sliders publish complete, ordered groups of joint positions
+with velocity-aware durations on each controller's `/joint_trajectory` topic.
+Position mode uses `/commands`. The server checks trajectory topics, joint order,
+finite positions and joint bounds against the robot configuration before publishing.
 
 Native CameraPlugin and RangefinderLidarPlugin publish from the same MuJoCo
 state used by controllers. The base IMU exposes native frame-quaternion, gyro

@@ -1,0 +1,12 @@
+/build/
+/install/
+/log/
+/.venv/
+/tmp/
+__pycache__/
+*.pyc
+.cadgen/
+.env
+
+/assets/robocasa/.downloads/
+/assets/robocasa/*/
