@@ -1,0 +1,45 @@
+name: handy101
+services:
+  ros-dev:
+    image: handy101:jazzy
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      additional_contexts:
+        base101: ${BASE101_PATH:-../base101}
+        mod101: ${MOD101_PATH:-../mod101}
+    init: true
+    tty: true
+    stdin_open: true
+    ports:
+      - "127.0.0.1:8888:8888"
+      - "127.0.0.1:7447:7447"
+    environment:
+      ROS_DOMAIN_ID: ${HANDY101_ROS_DOMAIN_ID:-184}
+      RMW_IMPLEMENTATION: rmw_zenoh_cpp
+      UHLC_MAX_DELTA_MS: ${HANDY101_UHLC_MAX_DELTA_MS:-10000}
+      DISPLAY: ${DISPLAY:-:0}
+      QT_X11_NO_MITSHM: "1"
+    volumes:
+      - .:/workspace/handy101
+      - ${BASE101_PATH:-../base101}:/workspace/base101:ro
+      - ${MOD101_PATH:-../mod101}:/workspace/mod101:ro
+      - handy101-build:/workspace/handy101/build
+      - handy101-install:/workspace/handy101/install
+      - handy101-log:/workspace/handy101/log
+      - /tmp/.X11-unix:/tmp/.X11-unix:ro
+  router:
+    image: handy101:jazzy
+    init: true
+    network_mode: "service:ros-dev"
+    depends_on: [ros-dev]
+    environment:
+      ROS_DOMAIN_ID: ${HANDY101_ROS_DOMAIN_ID:-184}
+      RMW_IMPLEMENTATION: rmw_zenoh_cpp
+      UHLC_MAX_DELTA_MS: ${HANDY101_UHLC_MAX_DELTA_MS:-10000}
+    command: ["ros2", "run", "rmw_zenoh_cpp", "rmw_zenohd"]
+    profiles: ["router"]
+volumes:
+  handy101-build:
+  handy101-install:
+  handy101-log:

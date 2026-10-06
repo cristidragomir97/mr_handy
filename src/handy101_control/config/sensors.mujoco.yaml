@@ -1,0 +1,39 @@
+controller_manager:
+  ros__parameters:
+    mujoco_plugins:
+      mujoco_camera_plugin:
+        type: mujoco_ros2_control_plugins/CameraPlugin
+        camera_publish_rate: 5.0
+        base_camera:
+          frame_name: camera_optical_frame
+          info_topic: /base_camera/camera_info
+          image_topic: /base_camera/color/image_raw
+          depth_topic: /base_camera/depth/image_raw
+        head_camera:
+          frame_name: head_camera_optical_frame
+          info_topic: /head_camera/camera_info
+          image_topic: /head_camera/color/image_raw
+          depth_topic: /head_camera/depth/image_raw
+        left_arm_camera:
+          frame_name: left_arm_camera_tool_optical_frame
+          info_topic: /left_arm_camera/camera_info
+          image_topic: /left_arm_camera/color/image_raw
+          depth_topic: /left_arm_camera/depth/image_raw
+        home_overview: null
+        policy: disabled
+      left_arm_gopro:
+        frame_name: left_arm_camera_tool_gopro_optical_frame
+        info_topic: /left_arm_gopro/camera_info
+        image_topic: /left_arm_gopro/color/image_raw
+        depth_topic: /simulation/left_arm_gopro/depth/image_raw
+      rangefinder_lidar_plugin:
+        type: mujoco_ros2_control_plugins/RangefinderLidarPlugin
+        lidar_publish_rate: 10.0
+        base_lidar:
+          frame_name: lidar_frame
+          min_angle: -3.141592653589793
+          max_angle: 3.141592653589793
+          angle_increment: 0.01750190893364787
+          range_min: 0.12
+          range_max: 12.0
+          laserscan_topic: /scan

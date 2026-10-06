@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>handy101_description</name>
+  <version>0.1.0</version>
+  <description>Lift and upper-body overlay for the base101 mobile chassis.</description>
+  <maintainer email="cdr@example.com">cdr</maintainer>
+  <license>UNLICENSED</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <exec_depend>base101_description</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>mod101_description</exec_depend>
+  <exec_depend>handy101_control</exec_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

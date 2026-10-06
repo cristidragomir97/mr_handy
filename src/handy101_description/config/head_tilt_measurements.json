@@ -1,0 +1,22 @@
+{
+  "source_sha256": "8e080226aecc7d4cf463ab827968db26bfee0a4db515a40f20c07c7ff327e60c",
+  "method": "STEP analytic cylindrical surfaces: servo shaft radii 9.6/5.3/3.1 mm and support bearing seats radius 10.1 mm share X/Z and lateral Y axis. Pivot Y selected at servo bbox centre.",
+  "pivot_cad_mm": [
+    10.1668669151222,
+    3.50147151638706,
+    681.845890773482
+  ],
+  "axis": [
+    0,
+    1,
+    0
+  ],
+  "pivot_relative_mount_m": [
+    0.0105999994233,
+    0.00200147151639,
+    0.6170500004945
+  ],
+  "zero_pose": "exported STEP pose",
+  "positive_direction": "right hand rotation about +Y, forward camera tilts downward",
+  "limits": "provisional +/-90 degrees until mechanical range confirmed"
+}

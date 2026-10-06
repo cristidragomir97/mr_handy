@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<!--
+DESIGN LEDGER: handy101 lift subsystem, robot frame imported from base101.
+Units m/kg/s/rad. All meshes mm, scale 0.001; link frames +X/+Y/+Z parallel
+with CAD and chassis axes. Source: base101_lift.step, source SHA and exact
+measurements in config/cad_measurements.json. No original CAD file is modified.
+
+Frame alignment: CAD deck centre (-0.433132508, 1.5) mm and top Z=64.795890279
+mm map to base101 deck centre (0,0) and top Z=0.084965 m. Translation only.
+The existing ground-centred base_link stays unchanged. Overlay mounts to it.
+
+Links:
+ lift_left_structure, lift_right_structure: fixed rigid column assemblies,
+ each origin at deck centre/top, same axes as base_link; meshes re-framed there.
+ Each contains extrusion, rail, screw, bearing, servo, adapters, end cap/base.
+ The screw is visually fixed: prismatic lift motion abstracts the screw drive.
+ lift_left_main, lift_right_main: moving assembly; frame at CAD nut bbox centre,
+ includes main platform, nut, MGN12 block rigidly together in link-local visuals.
+ The obsolete lift_left_carriage and lift_right_carriage are excluded.
+ lift_crossbar: aluminum fixed crossbar, frame at deck centre/top.
+ head_camera_mount: printed top mount and servo body, fixed to crossbar;
+ frame coincident with the crossbar/deck frame, local mm meshes.
+ head_camera_link: RealSense body and printed support, framed at the CAD camera
+ bbox centre, axes parallel to chassis; exact exported pose is preserved.
+ head_camera_mount_joint is fixed identity. head_camera_tilt_joint rotates
+ head_camera_tilt_frame about +Y at the measured servo shaft/bearing axis:
+ CAD X=10.166866915 mm, Z=681.845890773 mm, Y=3.501471516 mm
+ (servo body lateral centre; any point on this axis is equivalent).
+ Servo coaxial cylindrical surfaces and both support bearing seats agree.
+ head_camera_pose_joint fixes the camera bbox-centred link to this pivot frame.
+ q=0 preserves the exported pose; positive +Y tilts the forward camera downward.
+ See config/head_tilt_measurements.json. Frame-only pivot adds no physical mass.
+ Arms attach to the respective main links through arms.xacro; measured servo
+ and shoulder datums establish their transforms independently of these COMs.
+
+Joints:
+ left_structure_mount/right_structure_mount: parent -> structure, fixed,
+ XYZ (0,0,0.084965), RPY identity, deck alignment above.
+ left_lift_joint/right_lift_joint: respective structure -> main, prismatic,
+ +Z raises platform; q=0 is the STEP pose and user-confirmed lowest mechanical position.
+ Origins copied from CAD nut centres relative to deck, RPY identity.
+ crossbar_mount: parent -> crossbar, fixed (0,0,0.084965), RPY identity.
+
+Geometry and inertia:
+ Each physical link has link-local material-group STL visuals, identity origins,
+ scale 0.001. Extrusions/crossbar/camera housing aluminum, main/top/base/printed
+ mounts black plastic, rails/screws/bearings steel, nuts brass.
+ Collision: component boxes for columns, combined box for main and crossbar.
+ CAD mass/COM/inertia calculations are documented in lift_geometry.xacro and
+ config/cad_measurements.json; material densities are assumptions, motors 55 g.
+ Shapes are rigid groups; inertials summed with the parallel-axis theorem.
+
+LIMITS AND ASSUMPTIONS:
+ Travel [0,0.45] m: 450 mm usable travel confirmed by the user.
+ Zero is the STEP pose, confirmed by the user as the lowest possible position.
+ Homing sensor and hardware zero calibration are outside this description stage.
+ Max force 100 N; max speed 0.02 m/s; viscous damping 30 N s/m; not calibrated.
+ Independent lift axes; no mimic constraint or assumed mechanical coupling.
+ Screw lead and rotational actuator model not yet known or represented.
+ Head tilt range defaults to provisional +/-90 degrees; effort 2 N m, speed
+ 1 rad/s and damping 0.1 are simulation estimates, not calibrated hardware. The dual mod101 arms are imported separately by arms.xacro. Head motor mass 55 g and camera 72 g are estimates.
+ MuJoCo/ROS actuator integration is not implemented by this geometry macro.
+-->
+  <xacro:arg name="head_tilt_lower" default="-1.5707963267948966"/>
+  <xacro:arg name="head_tilt_upper" default="1.5707963267948966"/>
+  <xacro:include filename="$(find handy101_description)/urdf/lift_geometry.xacro"/>
+  <xacro:macro name="handy101_lifts" params="parent left_travel:=0.45 right_travel:=0.45">
+    <material name="handy_aluminum"><color rgba="0.77 0.78 0.79 1"/></material>
+    <material name="handy_black_plastic"><color rgba="0.075 0.075 0.080 1"/></material>
+    <material name="handy_steel"><color rgba="0.60 0.605 0.62 1"/></material>
+    <material name="handy_brass"><color rgba="0.65 0.48 0.20 1"/></material>
+    <xacro:lift_left_structure_geometry/>
+    <xacro:lift_right_structure_geometry/>
+    <xacro:lift_left_main_geometry/>
+    <xacro:lift_right_main_geometry/>
+    <xacro:lift_crossbar_geometry/>
+    <xacro:head_camera_mount_geometry/>
+    <xacro:head_camera_link_geometry/>
+    <joint name="left_structure_mount" type="fixed">
+      <parent link="${parent}"/><child link="lift_left_structure"/>
+      <origin xyz="0 0 0.084965" rpy="0 0 0"/>
+    </joint>
+    <joint name="right_structure_mount" type="fixed">
+      <parent link="${parent}"/><child link="lift_right_structure"/>
+      <origin xyz="0 0 0.084965" rpy="0 0 0"/>
+    </joint>
+    <joint name="left_lift_joint" type="prismatic">
+      <parent link="lift_left_structure"/><child link="lift_left_main"/>
+      <origin xyz="-0.000400000627411 0.100001465631 0.0957499878743" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="0" upper="${left_travel}" effort="100" velocity="0.02"/>
+      <dynamics damping="30" friction="0"/>
+    </joint>
+    <joint name="right_lift_joint" type="prismatic">
+      <parent link="lift_right_structure"/><child link="lift_right_main"/>
+      <origin xyz="-5.75775811862e-10 -0.0999987298309 0.0955499878744" rpy="0 0 0"/>
+      <axis xyz="0 0 1"/>
+      <limit lower="0" upper="${right_travel}" effort="100" velocity="0.02"/>
+      <dynamics damping="30" friction="0"/>
+    </joint>
+    <joint name="crossbar_mount" type="fixed">
+      <parent link="${parent}"/><child link="lift_crossbar"/>
+      <origin xyz="0 0 0.084965" rpy="0 0 0"/>
+    </joint>
+    <joint name="head_camera_mount_joint" type="fixed">
+      <parent link="lift_crossbar"/><child link="head_camera_mount"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+    <link name="head_camera_tilt_frame"/>
+    <joint name="head_camera_tilt_joint" type="revolute">
+      <parent link="head_camera_mount"/><child link="head_camera_tilt_frame"/>
+      <origin xyz="0.0105999994233 0.00200147151639 0.6170500004945" rpy="0 0 0"/>
+      <axis xyz="0 1 0"/>
+      <limit lower="$(arg head_tilt_lower)" upper="$(arg head_tilt_upper)" effort="2" velocity="1"/>
+      <dynamics damping="0.1" friction="0"/>
+    </joint>
+    <!-- Fixed mesh frame offset preserves every visual/inertial at q=0. -->
+    <joint name="head_camera_pose_joint" type="fixed">
+      <parent link="head_camera_tilt_frame"/><child link="head_camera_link"/>
+      <origin xyz="0.0243032963678 0.00004257521064 0.0266071180705" rpy="0 0 0"/>
+    </joint>
+    <!-- Mechanical front-face centre from the STEP camera bounds; exact lens
+         principal point remains a calibration datum. Optical Z forward/X right/Y down. -->
+    <link name="head_camera_optical_frame"/>
+    <joint name="head_camera_optical_joint" type="fixed">
+      <parent link="head_camera_link"/><child link="head_camera_optical_frame"/>
+      <origin xyz="0.012597239323706 0 0" rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+    </joint>
+  </xacro:macro>
+</robot>

@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<!--
+Design ledger: handy101, base101 plus two independently movable lifts and dual arms.
+Consumers: robot_state_publisher/RViz/CAD Viewer now; MuJoCo assembly next.
+Units: metres, kg, seconds, radians. REP-103 +X forward, +Y left, +Z up.
+Dependency ownership: import all chassis geometry from base101; no copied chassis.
+base101 owns drive, lidar, IMU, navigation, SLAM and base camera.
+Overlay owns lift links, lift joints, dual arm mounts and upper camera.
+The base camera uses base101's camera argument. Arm camera selection
+must have its own argument; do not overwrite the chassis camera parameter.
+Lift geometry and assumptions are recorded in lifts.xacro and cad_measurements.json.
+Arm configuration and measured mounts are recorded in arms.xacro and
+arm_mount_measurements.json.
+This entry point deliberately imports base101 without its old deck-mounted arm.
+No controller or camera-driver processes are launched by a robot description.
+-->
+<robot name="handy101" xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- Simulation control is owned by the overlay; keep simulator=none when
+       control_backend=mock/mujoco so the chassis emits no separate system. -->
+  <xacro:arg name="control_backend" default="none"/>
+  <xacro:arg name="mujoco_model" default=""/>
+  <xacro:arg name="headless" default="false"/>
+  <xacro:arg name="simulator" default="none"/>
+  <xacro:arg name="arm" default="false"/>
+  <xacro:arg name="upper_deck" default="false"/>
+  <xacro:arg name="camera" default="realsense"/>
+  <xacro:arg name="arms" default="true"/>
+  <!-- User-confirmed 450 mm travel; zero is the user-confirmed fully lowered CAD pose. -->
+  <xacro:arg name="left_lift_travel" default="0.45"/>
+  <xacro:arg name="right_lift_travel" default="0.45"/>
+  <xacro:include filename="$(find base101_description)/urdf/base101.xacro"/>
+  <xacro:include filename="$(find handy101_description)/urdf/lifts.xacro"/>
+  <xacro:handy101_lifts parent="base_link"
+                       left_travel="$(arg left_lift_travel)"
+                       right_travel="$(arg right_lift_travel)"/>
+  <xacro:if value="$(arg arms)">
+    <xacro:include filename="$(find handy101_description)/urdf/arms.xacro"/>
+    <xacro:handy101_arms use_sim="${'$(arg simulator)' == 'gazebo'}"/>
+  </xacro:if>
+  <xacro:if value="${'$(arg control_backend)' in ['mock', 'mujoco']}">
+    <xacro:include filename="$(find handy101_control)/urdf/handy101.ros2control.xacro"/>
+    <xacro:handy101_ros2control backend="$(arg control_backend)"/>
+  </xacro:if>
+</robot>

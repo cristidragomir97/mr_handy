@@ -1,0 +1,241 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<!-- CAD-derived geometry/inertial constants; see cad_measurements.json.
+     STL mm, 0.001 scale. COM/inertia from solid volumes and estimated densities.
+     All material-group visuals share their parent link frame and zero origin.
+     Structure collisions are component boxes; main/head collisions are coarse boxes. -->
+<xacro:macro name="lift_left_structure_geometry" params="">
+  <link name="lift_left_structure">
+    <inertial>
+      <origin xyz="-0.00029168248134 0.122096113584 0.269338822258" rpy="0 0 0"/>
+      <mass value="1.47831863395"/>
+      <inertia ixx="0.0633750471807" iyy="0.0631321284614" izz="0.000640452587496" ixy="1.86527993473e-06" ixz="1.0669504794e-05" iyz="-8.01299444631e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_left_structure_aluminum.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_aluminum"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_left_structure_steel.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_steel"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_left_structure_black_plastic.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_black_plastic"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.000400000576938 0.1300013679 0.265500001214" rpy="0 0 0"/>
+      <geometry><box size="0.04 0.0200000000004 0.611000002428"/></geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.000200000576696 0.0875018679 0.0299000012288" rpy="0 0 0"/>
+      <geometry><box size="0.024723 0.045223 0.0378"/></geometry>
+    </collision>
+    <collision>
+      <origin xyz="-0.000200000576701 0.113501419708 0.575499996918" rpy="0 0 0"/>
+      <geometry><box size="0.06 0.062999896384 0.0410000071526"/></geometry>
+    </collision>
+    <collision>
+      <origin xyz="-4.20222114883e-10 0.104501419708 -0.0124999822453" rpy="0 0 0"/>
+      <geometry><box size="0.0600000003115 0.0809998963839 0.0950000355094"/></geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+<xacro:macro name="lift_left_main_geometry" params="">
+  <link name="lift_left_main">
+    <inertial>
+      <origin xyz="0.00404103723838 0.0415263763737 0.00509180250269" rpy="0 0 0"/>
+      <mass value="0.407042663813"/>
+      <inertia ixx="0.000436932347946" iyy="0.000263422302879" izz="0.000570073094858" ixy="2.11587033717e-05" ixz="-4.32222104239e-06" iyz="3.63536709348e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_left_main_black_plastic.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_black_plastic"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_left_main_brass.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_brass"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_left_main_steel.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_steel"/>
+    </visual>
+    <collision>
+      <origin xyz="0.00580430412205 0.03717400908 0.00266770175475" rpy="0 0 0"/>
+      <geometry><box size="0.0816086069893 0.110348107403 0.0461646334538"/></geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+<xacro:macro name="lift_right_structure_geometry" params="">
+  <link name="lift_right_structure">
+    <inertial>
+      <origin xyz="6.87624550364e-05 -0.122093548871 0.269338785662" rpy="0 0 0"/>
+      <mass value="1.47833279557"/>
+      <inertia ixx="0.0633754922575" iyy="0.0631325615118" izz="0.000640449597046" ixy="-1.90596090695e-06" ixz="-5.88607953417e-06" iyz="8.0128956316e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_right_structure_aluminum.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_aluminum"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_right_structure_steel.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_steel"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_right_structure_black_plastic.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_black_plastic"/>
+    </visual>
+    <collision>
+      <origin xyz="-5.75290693305e-10 -0.1299986321 0.265500001214" rpy="0 0 0"/>
+      <geometry><box size="0.04 0.0200000000001 0.611000002428"/></geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.000199999424946 -0.0874991321001 0.0299000099696" rpy="0 0 0"/>
+      <geometry><box size="0.024723 0.045223 0.0378"/></geometry>
+    </collision>
+    <collision>
+      <origin xyz="0.000199999424953 -0.113498683908 0.575499996918" rpy="0 0 0"/>
+      <geometry><box size="0.06 0.062999896384 0.0410000071526"/></geometry>
+    </collision>
+    <collision>
+      <origin xyz="-7.31521124564e-10 -0.104498683908 -0.012499975452" rpy="0 0 0"/>
+      <geometry><box size="0.0600000003115 0.0809998963839 0.0950000490958"/></geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+<xacro:macro name="lift_right_main_geometry" params="">
+  <link name="lift_right_main">
+    <inertial>
+      <origin xyz="0.00404103798895 -0.0415263886413 0.00528561521497" rpy="0 0 0"/>
+      <mass value="0.407042583061"/>
+      <inertia ixx="0.0004369715775" iyy="0.000263461738851" izz="0.000570072887212" ixy="-2.11587238728e-05" ixz="-4.33241366995e-06" iyz="-3.62490575208e-05"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_right_main_black_plastic.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_black_plastic"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_right_main_brass.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_brass"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_right_main_steel.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_steel"/>
+    </visual>
+    <collision>
+      <origin xyz="0.00580430407205 -0.03717400908 0.00286770175475" rpy="0 0 0"/>
+      <geometry><box size="0.0816086069893 0.110348107403 0.0461646334538"/></geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+<xacro:macro name="lift_crossbar_geometry" params="">
+  <link name="lift_crossbar">
+    <inertial>
+      <origin xyz="-0.000200972126482 0.00200147151636 0.58099951608" rpy="0 0 0"/>
+      <mass value="0.141247726459"/>
+      <inertia ixx="0.000430878843925" iyy="2.91472699855e-05" izz="0.00044810891359" ixy="-1.81046675031e-19" ixz="-1.36455345253e-09" iyz="2.79046534143e-16"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/lift_crossbar_aluminum.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_aluminum"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.000200000576703 0.00200147151636 0.581000000495" rpy="0 0 0"/>
+      <geometry><box size="0.04 0.19 0.0200000000001"/></geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+<xacro:macro name="head_camera_mount_geometry" params="">
+  <link name="head_camera_mount">
+    <inertial>
+      <origin xyz="-0.00115584199185 0.00203087192212 0.602530530882" rpy="0 0 0"/>
+      <mass value="0.110518761501"/>
+      <inertia ixx="4.74225349778e-05" iyy="5.86515160592e-05" izz="3.63864054378e-05" ixy="-7.0471688025e-08" ixz="1.72157331244e-06" iyz="-1.28017226849e-08"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/head_camera_mount_black_plastic.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_black_plastic"/>
+    </visual>
+    <collision>
+      <origin xyz="-2.50005766664e-05 0.00200147151641 0.597705750495" rpy="0 0 0"/>
+      <geometry><box size="0.05015 0.0403 0.0634115"/></geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+<xacro:macro name="head_camera_link_geometry" params="">
+  <link name="head_camera_link">
+    <inertial>
+      <origin xyz="-0.00830030441926 0.000931597721401 -0.00396337637383" rpy="0 0 0"/>
+      <mass value="0.1073543997"/>
+      <inertia ixx="7.26661753427e-05" iyy="3.00380606031e-05" izz="7.76965164437e-05" ixy="-2.83662362967e-07" ixz="-6.888711814e-06" iyz="-3.21472817152e-07"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/head_camera_link_black_plastic.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_black_plastic"/>
+    </visual>
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://handy101_description/meshes/head_camera_link_aluminum.stl" scale="0.001 0.001 0.001"/>
+      </geometry>
+      <material name="handy_aluminum"/>
+    </visual>
+    <collision>
+      <origin xyz="-0.0119976216053 2.09610107049e-16 -0.0130525022439" rpy="0 0 0"/>
+      <geometry><box size="0.0491897218579 0.0899146223478 0.0511092318574"/></geometry>
+    </collision>
+  </link>
+</xacro:macro>
+
+</robot>

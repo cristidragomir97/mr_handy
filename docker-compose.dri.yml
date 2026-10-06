@@ -1,0 +1,5 @@
+# Selected automatically by manage.sh on Linux hosts with DRM render devices.
+services:
+  ros-dev:
+    devices:
+      - /dev/dri:/dev/dri

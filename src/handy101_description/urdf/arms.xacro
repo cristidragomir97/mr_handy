@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<!--
+DESIGN LEDGER: dual mod101 composition, owned by handy101.
+SI units m/kg/s/rad; REP-103 chassis axes. Each source arm is imported from
+mod101_description, never copied. Existing source meshes retain their original
+mm units with explicit 0.001 scale and their source visual origins.
+
+Frames: left_arm_base_link parents to lift_left_main; right_arm_base_link
+parents to lift_right_main. Identity mounting RPY, measured translations below.
+Arm mount translations come from matching the STEP base servo to the imported
+URDF base servo, independently cross-checked against the rigid shoulder body at
+q_base=0. Bounds residual below 0.03 mm on each side. See
+config/arm_mount_measurements.json for the numerical derivation and STEP digest.
+The lift platforms replace the standalone base housing/cover. base_housing=false
+retains a frame-only arm base_link, base motor and all kinematics, and avoids
+rendering/massing the housing twice. The source macro defaults to true elsewhere.
+
+User configuration:
+ RIGHT dominant arm: 7DOF PGGripper, shoulder 0.080 m, elbow 0.100 m,
+ wrist camera disabled. Tool yaw/drive joint named right_arm_6.
+ LEFT arm: 7DOF camera tool, shoulder 0.080 m, elbow 0.100 m,
+ Luxonis; GoPro disabled, wrist camera disabled. Camera tool has no drive joint.
+ Small shoulder/elbow motor mounts retained from the STEP and source defaults.
+Arm rail lengths describe the actual extrusion lengths, not shoulder-to-tip
+reach including the source servo modules. Source arm joint signs and limits
+are retained. Arm inertials are inherited; extrusions are recalculated by the
+source macro at the supplied lengths. The overlay control package supplies MuJoCo actuator wiring.
+
+Wrist camera settings are per-arm macro parameters, independent of the chassis camera
+argument. No mod101_config.xacro is included, so the bench configurator cannot
+silently replace this robot's per-arm choices. Prefixes cover every arm link,
+joint and ros2_control component. Only Gazebo uses source use_sim=true; geometry
+inspection/MuJoCo composition uses false (no Gazebo arm plugin).
+-->
+  <xacro:arg name="left_arm_dof" default="7"/>
+  <xacro:arg name="left_camera_sensor" default="luxonis"/>
+  <xacro:arg name="left_camera_gopro" default="false"/>
+  <xacro:arg name="left_arm_tool" default="camera"/>
+  <xacro:arg name="left_arm_wrist_camera" default="false"/>
+  <xacro:arg name="left_shoulder_length" default="0.080"/>
+  <xacro:arg name="left_elbow_length" default="0.100"/>
+  <xacro:arg name="left_shoulder_mount" default="small"/>
+  <xacro:arg name="left_elbow_mount" default="small"/>
+  <xacro:arg name="right_arm_dof" default="7"/>
+  <xacro:arg name="right_camera_sensor" default="luxonis"/>
+  <xacro:arg name="right_camera_gopro" default="false"/>
+  <xacro:arg name="right_arm_tool" default="pggripper"/>
+  <xacro:arg name="right_arm_wrist_camera" default="false"/>
+  <xacro:arg name="right_shoulder_length" default="0.080"/>
+  <xacro:arg name="right_elbow_length" default="0.100"/>
+  <xacro:arg name="right_shoulder_mount" default="small"/>
+  <xacro:arg name="right_elbow_mount" default="small"/>
+  <xacro:include filename="$(find mod101_description)/urdf/mod101_macro.xacro"/>
+  <!-- base101 supplies the shared silver/motor/accent materials. -->
+  <material name="body_darkgrey"><color rgba="0.075 0.075 0.080 1"/></material>
+  <xacro:macro name="handy101_arms" params="use_sim:=false">
+    <xacro:mod101_arm prefix="left_arm_" parent="lift_left_main"
+      xyz="0.058161910653 0.0752781867979 -0.0323500863566" rpy="0 0 0" base_housing="false" use_sim="${use_sim}" with_ros2_control="${use_sim}"
+      tool="$(arg left_arm_tool)" arm_dof="$(arg left_arm_dof)"
+      camera_sensor="$(arg left_camera_sensor)" camera_gopro="$(arg left_camera_gopro)"
+      wrist_camera="$(arg left_arm_wrist_camera)"
+      shoulder_ext_length="$(arg left_shoulder_length)"
+      elbow_ext_length="$(arg left_elbow_length)"
+      shoulder_mount="$(arg left_shoulder_mount)" elbow_mount="$(arg left_elbow_mount)"/>
+    <xacro:mod101_arm prefix="right_arm_" parent="lift_right_main"
+      xyz="0.058161910603 -0.0766179387649 -0.0321500863566" rpy="0 0 0" base_housing="false" use_sim="${use_sim}" with_ros2_control="${use_sim}"
+      tool="$(arg right_arm_tool)" arm_dof="$(arg right_arm_dof)"
+      camera_sensor="$(arg right_camera_sensor)" camera_gopro="$(arg right_camera_gopro)"
+      wrist_camera="$(arg right_arm_wrist_camera)"
+      shoulder_ext_length="$(arg right_shoulder_length)"
+      elbow_ext_length="$(arg right_elbow_length)"
+      shoulder_mount="$(arg right_shoulder_mount)" elbow_mount="$(arg right_elbow_mount)"/>
+    <!-- Camera module front-face datum; simulated optical centre is provisional. -->
+    <xacro:if value="${'$(arg left_arm_tool)' == 'camera'}">
+      <link name="left_arm_camera_tool_optical_frame"/>
+      <joint name="left_arm_camera_tool_optical_joint" type="fixed">
+        <parent link="left_arm_camera_tool_primary"/><child link="left_arm_camera_tool_optical_frame"/>
+        <origin xyz="${0.03045 if '$(arg left_camera_sensor)' == 'luxonis' else 0.03805} 0 -0.01125"
+                rpy="-1.5707963267948966 0 -1.5707963267948966"/>
+      </joint>
+    </xacro:if>
+  </xacro:macro>
+</robot>

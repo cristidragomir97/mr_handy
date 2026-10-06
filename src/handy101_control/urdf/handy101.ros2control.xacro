@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<!-- Control ledger: a single system owns the complete simulated assembly.
+ Base wheel interface declarations remain imported from base101. The overlay
+ owns 2 independent prismatic lift axes (m), 2 prefixed 6-axis arms (rad), their
+ right motor-driven tool (rad), passive PGGripper sliders (m), and head tilt (rad). Position + velocity feedback
+ comes from the selected backend, never a second mock tool system in MuJoCo.
+ Backend none emits no block; mock is for ROS routing checks; mujoco binds all
+ named joints/actuators to ONE scene and publishes a single simulation clock.
+ Hardware lift gearing, homing, servo IDs, buses and calibrated limits remain
+ outside this simulation configuration. Default joint limits mirror the source
+ descriptions. These are inherited simulation ranges, not hardware calibration.
+-->
+  <xacro:include filename="$(find base101_description)/urdf/wheel_interfaces.xacro"/>
+  <xacro:macro name="handy_position_interface" params="name lower upper">
+    <joint name="${name}">
+      <command_interface name="position">
+        <param name="min">${lower}</param><param name="max">${upper}</param>
+      </command_interface>
+      <state_interface name="position"><param name="initial_value">0.0</param></state_interface>
+      <state_interface name="velocity"><param name="initial_value">0.0</param></state_interface>
+    </joint>
+  </xacro:macro>
+  <xacro:macro name="handy_mimic_interface" params="name parent multiplier">
+    <joint name="${name}">
+      <param name="mimic">${parent}</param><param name="multiplier">${multiplier}</param>
+      <state_interface name="position"/><state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
+  <xacro:macro name="handy_arm_interfaces" params="prefix tool arm_dof">
+    <xacro:handy_position_interface name="${prefix}joint_base" lower="-1.570796" upper="1.570796"/>
+    <xacro:handy_position_interface name="${prefix}joint_shoulder" lower="-0.001" upper="3.141593"/>
+    <xacro:handy_position_interface name="${prefix}joint_elbow" lower="-0.001" upper="3.141593"/>
+    <xacro:if value="${int(arm_dof) == 7}"><xacro:handy_position_interface name="${prefix}joint_wrist_yaw" lower="-1.570796326795" upper="1.570796326795"/></xacro:if>
+    <xacro:handy_position_interface name="${prefix}joint_wrist_tilt" lower="-1.23" upper="1.54"/>
+    <xacro:handy_position_interface name="${prefix}joint_wrist_roll" lower="0" upper="3.141593"/>
+    <xacro:if value="${tool == 'jaws'}">
+      <xacro:handy_position_interface name="${prefix}6" lower="0" upper="2.14"/>
+    </xacro:if>
+    <xacro:if value="${tool == 'pggripper'}">
+      <xacro:property name="pg_control" value="${xacro.load_yaml('$(find mod101_tool_pggripper)/config/measurements.json')}"/>
+      <xacro:handy_position_interface name="${prefix}6" lower="0" upper="${pg_control['max_angle_rad']}"/>
+      <xacro:handy_mimic_interface name="${prefix}pggripper_left_slider" parent="${prefix}6" multiplier="${pg_control['pitch_radius_m']}"/>
+      <xacro:handy_mimic_interface name="${prefix}pggripper_right_slider" parent="${prefix}6" multiplier="${-pg_control['pitch_radius_m']}"/>
+    </xacro:if>
+    <xacro:if value="${tool == 'pincopen'}">
+      <xacro:handy_position_interface name="${prefix}6" lower="-2.44" upper="0"/>
+      <xacro:handy_mimic_interface name="${prefix}pincopen_base_to_right_arm" parent="${prefix}6" multiplier="0.5"/>
+      <xacro:handy_mimic_interface name="${prefix}pincopen_base_to_left_arm" parent="${prefix}6" multiplier="-0.5"/>
+      <xacro:handy_mimic_interface name="${prefix}pincopen_right_arm_to_right_finger" parent="${prefix}6" multiplier="-0.5"/>
+      <xacro:handy_mimic_interface name="${prefix}pincopen_left_arm_to_left_finger" parent="${prefix}6" multiplier="0.5"/>
+    </xacro:if>
+  </xacro:macro>
+  <xacro:macro name="handy101_ros2control" params="backend">
+    <ros2_control name="handy101_system" type="system">
+      <hardware>
+        <xacro:if value="${backend == 'mock'}">
+          <plugin>mock_components/GenericSystem</plugin>
+          <param name="calculate_dynamics">true</param>
+        </xacro:if>
+        <xacro:if value="${backend == 'mujoco'}">
+          <plugin>mujoco_ros2_control/MujocoSystemInterface</plugin>
+          <param name="mujoco_model">$(arg mujoco_model)</param>
+          <param name="headless">$(arg headless)</param>
+          <param name="sim_speed_factor">1.0</param>
+          <param name="odom_free_joint_name">floating_base_joint</param>
+          <param name="odom_topic">/simulation/ground_truth_odom</param>
+        </xacro:if>
+      </hardware>
+      <xacro:if value="${backend == 'mujoco'}">
+        <sensor name="base_imu">
+          <param name="mujoco_type">imu</param><param name="mujoco_sensor_name">base_imu</param>
+          <state_interface name="orientation.x"/><state_interface name="orientation.y"/>
+          <state_interface name="orientation.z"/><state_interface name="orientation.w"/>
+          <state_interface name="angular_velocity.x"/><state_interface name="angular_velocity.y"/><state_interface name="angular_velocity.z"/>
+          <state_interface name="linear_acceleration.x"/><state_interface name="linear_acceleration.y"/><state_interface name="linear_acceleration.z"/>
+        </sensor>
+      </xacro:if>
+      <xacro:base101_wheel_interfaces/>
+      <xacro:handy_position_interface name="left_lift_joint" lower="0" upper="$(arg left_lift_travel)"/>
+      <xacro:handy_position_interface name="right_lift_joint" lower="0" upper="$(arg right_lift_travel)"/>
+      <xacro:handy_position_interface name="head_camera_tilt_joint" lower="$(arg head_tilt_lower)" upper="$(arg head_tilt_upper)"/>
+      <xacro:if value="$(arg arms)">
+        <xacro:handy_arm_interfaces prefix="left_arm_" tool="$(arg left_arm_tool)" arm_dof="$(arg left_arm_dof)"/>
+        <xacro:handy_arm_interfaces prefix="right_arm_" tool="$(arg right_arm_tool)" arm_dof="$(arg right_arm_dof)"/>
+      </xacro:if>
+    </ros2_control>
+  </xacro:macro>
+</robot>

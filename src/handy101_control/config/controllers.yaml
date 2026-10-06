@@ -1,0 +1,156 @@
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+    enforce_command_limits: true
+    left_lift_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    left_lift_position_controller:
+      type: position_controllers/JointGroupPositionController
+    right_lift_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    right_lift_position_controller:
+      type: position_controllers/JointGroupPositionController
+    head_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    head_position_controller:
+      type: position_controllers/JointGroupPositionController
+    left_arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    left_arm_position_controller:
+      type: position_controllers/JointGroupPositionController
+    right_arm_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    right_arm_position_controller:
+      type: position_controllers/JointGroupPositionController
+    right_gripper_controller:
+      type: joint_trajectory_controller/JointTrajectoryController
+    right_gripper_position_controller:
+      type: position_controllers/JointGroupPositionController
+    imu_broadcaster:
+      type: imu_sensor_broadcaster/IMUSensorBroadcaster
+left_lift_controller:
+  ros__parameters:
+    joints:
+    - left_lift_joint
+    command_interfaces:
+    - position
+    state_interfaces:
+    - position
+    - velocity
+    allow_partial_joints_goal: false
+    constraints:
+      goal_time: 2.0
+      stopped_velocity_tolerance: 0.1
+left_lift_position_controller:
+  ros__parameters:
+    joints:
+    - left_lift_joint
+right_lift_controller:
+  ros__parameters:
+    joints:
+    - right_lift_joint
+    command_interfaces:
+    - position
+    state_interfaces:
+    - position
+    - velocity
+    allow_partial_joints_goal: false
+    constraints:
+      goal_time: 2.0
+      stopped_velocity_tolerance: 0.1
+right_lift_position_controller:
+  ros__parameters:
+    joints:
+    - right_lift_joint
+head_controller:
+  ros__parameters:
+    joints:
+    - head_camera_tilt_joint
+    command_interfaces:
+    - position
+    state_interfaces:
+    - position
+    - velocity
+    allow_partial_joints_goal: false
+    constraints:
+      goal_time: 2.0
+      stopped_velocity_tolerance: 0.1
+head_position_controller:
+  ros__parameters:
+    joints:
+    - head_camera_tilt_joint
+left_arm_controller:
+  ros__parameters:
+    joints:
+    - left_arm_joint_base
+    - left_arm_joint_shoulder
+    - left_arm_joint_elbow
+    - left_arm_joint_wrist_yaw
+    - left_arm_joint_wrist_tilt
+    - left_arm_joint_wrist_roll
+    command_interfaces:
+    - position
+    state_interfaces:
+    - position
+    - velocity
+    allow_partial_joints_goal: false
+    constraints:
+      goal_time: 2.0
+      stopped_velocity_tolerance: 0.1
+left_arm_position_controller:
+  ros__parameters:
+    joints:
+    - left_arm_joint_base
+    - left_arm_joint_shoulder
+    - left_arm_joint_elbow
+    - left_arm_joint_wrist_yaw
+    - left_arm_joint_wrist_tilt
+    - left_arm_joint_wrist_roll
+right_arm_controller:
+  ros__parameters:
+    joints:
+    - right_arm_joint_base
+    - right_arm_joint_shoulder
+    - right_arm_joint_elbow
+    - right_arm_joint_wrist_yaw
+    - right_arm_joint_wrist_tilt
+    - right_arm_joint_wrist_roll
+    command_interfaces:
+    - position
+    state_interfaces:
+    - position
+    - velocity
+    allow_partial_joints_goal: false
+    constraints:
+      goal_time: 2.0
+      stopped_velocity_tolerance: 0.1
+right_arm_position_controller:
+  ros__parameters:
+    joints:
+    - right_arm_joint_base
+    - right_arm_joint_shoulder
+    - right_arm_joint_elbow
+    - right_arm_joint_wrist_yaw
+    - right_arm_joint_wrist_tilt
+    - right_arm_joint_wrist_roll
+right_gripper_controller:
+  ros__parameters:
+    joints:
+    - right_arm_6
+    command_interfaces:
+    - position
+    state_interfaces:
+    - position
+    - velocity
+    allow_partial_joints_goal: false
+    constraints:
+      goal_time: 2.0
+      stopped_velocity_tolerance: 0.1
+right_gripper_position_controller:
+  ros__parameters:
+    joints:
+    - right_arm_6
+imu_broadcaster:
+  ros__parameters:
+    sensor_name: base_imu
+    frame_id: imu_link
