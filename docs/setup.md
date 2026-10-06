@@ -13,24 +13,20 @@ ROS 2 Jazzy image. You do not need ROS installed on the host for the container w
 
 ## Companion repositories
 
-Keep the three working trees side by side:
+Docker uses GitHub build contexts for
+[base101](https://github.com/robocore-labs/base101) and
+[mod101](https://github.com/robocore-labs/mod101). BuildKit downloads and caches its
+own copies; no host clones or repository path settings are needed.
 
-```
-mr_handy/
-  base101/
-  mod101/
-  handy101/
-  base101_lift.step
-```
-
-Use the companion working trees with the integration changes applied:
-
-- **base101:** reusable wheel interfaces and rosboard's robot-specific joint controls and JSON serialization fixes.
-- **mod101:** the 7DOF arm option, camera and PGGripper tool packages, optional base housing and optional standalone control blocks.
-
-Docker builds these sibling sources, including uncommitted changes. Handy101
-imports them rather than keeping copies. Set `BASE101_PATH` and `MOD101_PATH` in
-`.env` if they live elsewhere. The STEP file is only needed when re-exporting CAD.
+Each `start` or `recreate` resolves the latest commit on each repository's default
+branch and rebuilds affected image layers. Network access to GitHub is required.
+The image keeps the dependency package sources in `/opt/handy101_dependencies/src`
+so `manage.sh build` can rebuild them alongside this project's mounted sources.
+`build` and `restart` use the existing image sources; use `recreate` to update them.
+Docker applies the compatibility adapter in `docker/prepare_dependencies.py` to
+its downloaded copies: optional raised-deck selection, browser-safe rosboard
+JSON, and an assembly-specific EKF configuration override for base101 SLAM. Unexpected upstream layouts fail the build for review. Host clones are
+not modified. The STEP file is only needed when re-exporting CAD.
 
 ## Container commands
 
@@ -42,6 +38,7 @@ Run these from the Handy101 repository:
 ./scripts/manage.sh mock              # check controller routing without physics
 ./scripts/manage.sh build             # rebuild ROS packages after source changes
 ./scripts/manage.sh build rosboard    # rebuild a specific package
+./scripts/manage.sh test --nav         # verify live mapping and navigation
 ./scripts/manage.sh exec              # open a sourced container shell
 ./scripts/manage.sh logs              # follow container logs
 ./scripts/manage.sh stop              # stop this project's containers
@@ -54,17 +51,16 @@ starting another; the launch script rejects a second `sim` or `mock` instance.
 `start` builds a complete image. `recreate` rebuilds it and replaces the containers,
 while preserving source and named build volumes. `restart` restarts the existing
 containers. Build, install and log directories use Docker volumes, separate from
-native builds. The image includes a built assembly, and the containers mount the
-sibling working trees for development, including uncommitted changes.
+native builds. The image includes a built assembly, and the containers mount this
+repository for development. Dependency sources come from the image.
 
 ## Configuration and networking
 
-Copy `.env.example` to `.env` to change sibling repository paths, ROS domain,
+Copy `.env.example` to `.env` to change the ROS domain,
 GUI mode or the GPU adapter. The defaults are:
 
 | Setting | Default |
 |---|---|
-| `BASE101_PATH` / `MOD101_PATH` | `../base101` / `../mod101` |
 | `HANDY101_ROS_DOMAIN_ID` | `184` |
 | `HANDY101_HEADLESS` | `false` |
 | `HANDY101_START_ROUTER` | `true` |
@@ -94,7 +90,8 @@ cleanup issue. If shutdown hangs, stop the project's containers before relaunchi
 ## Native ROS build
 
 Install ROS 2 Jazzy and the simulation dependencies from `docker/Dockerfile`.
-Build the updated mod101 tools first, then run these commands from Handy101:
+Native builds still require separate base101 and mod101 workspaces. Build the
+mod101 tools first, then run these commands from Handy101:
 
 ```bash
 ./scripts/manage.sh world-assets

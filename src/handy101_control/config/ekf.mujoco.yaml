@@ -1,0 +1,22 @@
+# The four fixed-axis wheels skid in turns. Use encoders for forward speed,
+# and the chassis IMU for yaw rate rather than trusting encoder-derived yaw.
+# base101_slam still owns the EKF launch; these assembly-specific parameters
+# override its supplementary sim filter to become the sole odom TF publisher.
+ekf_filter_node:
+  ros__parameters:
+    publish_tf: true
+    two_d_mode: true
+    odom0: /diff_drive_controller/odom
+    odom0_config: [false, false, false,
+                   false, false, false,
+                   true, true, false,
+                   false, false, false]
+    odom0_differential: false
+    odom0_relative: false
+    imu0: /sensors/imu
+    imu0_config: [false, false, false,
+                  false, false, false,
+                  false, false, false,
+                  false, false, true]
+    imu0_differential: false
+    imu0_relative: false

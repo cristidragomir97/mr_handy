@@ -6,8 +6,8 @@ services:
       context: .
       dockerfile: docker/Dockerfile
       additional_contexts:
-        base101: ${BASE101_PATH:-../base101}
-        mod101: ${MOD101_PATH:-../mod101}
+        base101: https://github.com/robocore-labs/base101.git
+        mod101: https://github.com/robocore-labs/mod101.git
     init: true
     tty: true
     stdin_open: true
@@ -22,8 +22,6 @@ services:
       QT_X11_NO_MITSHM: "1"
     volumes:
       - .:/workspace/handy101
-      - ${BASE101_PATH:-../base101}:/workspace/base101:ro
-      - ${MOD101_PATH:-../mod101}:/workspace/mod101:ro
       - handy101-build:/workspace/handy101/build
       - handy101-install:/workspace/handy101/install
       - handy101-log:/workspace/handy101/log

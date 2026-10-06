@@ -19,13 +19,13 @@ in_container() {
     "${compose[@]}" exec "${tty[@]}" ros-dev /usr/local/bin/handy101-entrypoint "$@"
 }
 build() {
-    local select=(--packages-select base101_description base101_control rosboard
+    local select=(--packages-select base101_description base101_control base101_slam base101_nav rosboard
         mod101_tool_jaws mod101_tool_none mod101_tool_parallel
         mod101_tool_pincopen mod101_tool_camera mod101_tool_pggripper mod101_description handy101_description handy101_control
         handy101_bringup handy101_mujoco)
     (( $# == 0 )) || select=(--packages-select "$@")
     in_container colcon build --symlink-install --parallel-workers 2 \
-        --base-paths src /workspace/base101/src /workspace/mod101/src \
+        --base-paths src /opt/handy101_dependencies/src \
         "${select[@]}" --cmake-args -DPython3_EXECUTABLE=/usr/bin/python3
 }
 usage() {
@@ -44,6 +44,7 @@ Usage: ./scripts/manage.sh <command> [args]
   world-assets          Download/prepare attributed RoboCasa furniture and objects.
   test                  Run description/control/physics checks (no running sim needed).
   test --sim            Check ROS actions/TF/drive and rosboard against an active MuJoCo stack.
+  test --nav [--navigate] Check live SLAM/Nav2; optionally drive a short navigation goal.
 HELP
 }
 action=${1:-help}; (( $# == 0 )) || shift
@@ -77,7 +78,10 @@ case "$action" in
     world-assets) bash scripts/setup-world-assets.sh ;;
     rosboard) in_container ros2 run rosboard rosboard_node "$@" ;;
     test)
-        if [[ "${1:-}" == --sim ]]; then
+        if [[ "${1:-}" == --nav ]]; then
+            shift
+            in_container python3 checks/check_navigation_runtime.py "$@"
+        elif [[ "${1:-}" == --sim ]]; then
             in_container python3 checks/check_control_runtime.py --backend mujoco
             in_container python3 checks/check_rosboard_runtime.py
             in_container python3 checks/check_sensors_runtime.py

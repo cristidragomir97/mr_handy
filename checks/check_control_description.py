@@ -39,9 +39,11 @@ for name, settings in cfg.items():
     claimed.extend(settings["ros__parameters"]["joints"])
 assert len(claimed) == len(set(claimed)) == 16
 assert set(claimed) == {n for n in joints if "wheel" not in n and joints[n].find("mimic") is None}
-# Wheel interface template remains base-owned and is included rather than copied.
-control = (ROOT / "src/handy101_control/urdf/handy101.ros2control.xacro").read_text()
-assert "<xacro:base101_wheel_interfaces/>" in control
+# Published base101 wheel joints must all belong to the assembly's single system.
+assert {n for n in interfaces if "wheel" in n} == {
+    "front_left_wheel_joint", "front_right_wheel_joint",
+    "back_left_wheel_joint", "back_right_wheel_joint",
+}
 print(
     "PASS: one hardware system, 20 driven joints + 2 passive mimic joints uniquely owned, controller coverage and exact source position bounds."
 )

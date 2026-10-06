@@ -12,6 +12,7 @@ through to the assembly.
 
 - 🏠 Drive around a furnished kitchen, dining room and living room, with loose objects to pick up.
 - 🦾 Move the arms, lifts, gripper and head from the browser's joint sliders.
+- 🗺️ Build a map with base101 SLAM and navigate with its Nav2 stack.
 - 👀 Watch lidar, IMU and the three camera feeds in rosboard.
 - 🧩 Reuse the base101 and mod101 packages, with the lift system and robot assembly here.
 
@@ -21,28 +22,41 @@ The simulation has no GoPro or wrist cameras.
 
 ## 🚀 Getting started
 
-You'll need Docker with Compose, [uv](https://docs.astral.sh/uv/getting-started/installation/)
-for the first asset download, and the three repositories side by side:
+You'll need Docker with Compose and [uv](https://docs.astral.sh/uv/getting-started/installation/)
+for the first asset download. Docker fetches and manages its own copies of
+[base101](https://github.com/robocore-labs/base101) and
+[mod101](https://github.com/robocore-labs/mod101); no sibling clones are needed.
 
-```text
-mr_handy/
-  base101/
-  mod101/
-  handy101/
-```
-
-Use the companion base101 and mod101 working trees with the Handy101 integration
-changes applied. See [setup](docs/setup.md) for the required changes and custom paths.
-
-From `handy101`:
+From this repository:
 
 ```bash
 ./scripts/manage.sh start
 ./scripts/manage.sh sim
 ```
 
-The first start downloads the home assets and builds the container. Once it opens,
-you're in the furnished home with the robot ready to move.
+The first start downloads the home assets and builds the container. `sim` opens
+MuJoCo in the furnished home with the robot ready to move.
+
+Each `start` or `recreate` fetches the latest default-branch commits from GitHub.
+Docker caches the downloads and keeps dependency sources inside the image;
+`build` rebuilds ROS packages using those sources, while `restart` simply restarts
+the existing containers. To update an existing setup:
+
+```bash
+./scripts/manage.sh recreate
+./scripts/manage.sh test
+./scripts/manage.sh sim
+```
+
+The image build applies the compatibility fixes needed by this assembly to its
+own downloaded copies: raised-deck selection for the lift assembly and rosboard
+serialization of missing/non-finite feedback as JSON `null`. Existing local
+`base101` and `mod101` clones are unused. See [setup](docs/setup.md) for details.
+
+`sim` also starts base101's SLAM, EKF and Nav2 stacks. Mapping uses wheel speed
+and IMU yaw rate for odometry, with calibrated skid-steer control for turns. Open `/map` in rosboard
+to watch mapping, or add `rviz:=true` for the navigation display and goal tool.
+Use `mapping:=false navigation:=false` to run only the robot simulation.
 
 Open **[rosboard](http://localhost:8888)** to watch topics, use the joint sliders
 or drive with the teleop card. In the MuJoCo window, press **Tab** and

@@ -62,6 +62,63 @@ provides `/diff_drive_controller/odom` and `odom -> base_link`.
 `./scripts/manage.sh test --sim` checks sensors and the public movement input as well
 as controller actions, TF and the rosboard stream. This drives short test motions.
 
+## Mapping and navigation
+
+`sim` imports `base101_slam` and `base101_nav` from Docker's GitHub-managed
+base101 sources and starts both with simulation time. The current self-filter
+from `base101_lidar/config/lidar_filters.yaml` (matching the rear-facing scan zero)
+publishes `/scan_filtered` for SLAM and the Nav2 obstacle layers. For this
+assembled simulation, its rear mask is narrowed to ±65°: measured self-hits span
+±58°, and retaining the rear diagonals lets the initial map cover the robot
+behind the lidar origin. SLAM publishes
+`/map` and `map -> odom`. With mapping enabled, the EKF is the sole publisher of
+`odom -> base_link`, fusing encoder forward/lateral velocity with IMU yaw rate.
+Raw encoder yaw is excluded because the four-wheel chassis skids during turns;
+`/diff_drive_controller/odom` remains available for diagnostics, and
+`/odometry/filtered` contains the fused estimate. Without mapping, the drive
+controller publishes its usual wheel-only TF.
+Nav2 consumes the fused odometry when mapping is enabled, exposes `/navigate_to_pose` and routes stamped commands through
+`/cmd_vel_nav` into the existing twist multiplexer.
+
+```bash
+./scripts/manage.sh sim rviz:=true       # mapping + navigation + RViz goal tool
+./scripts/manage.sh sim navigation:=false  # mapping without Nav2
+./scripts/manage.sh sim mapping:=false navigation:=false  # sensors/control only
+./scripts/manage.sh test --nav             # map, lifecycle nodes and path planning
+./scripts/manage.sh test --nav --navigate  # also drive a short goal
+```
+
+RViz is off by default, including in headless runs. Mapping/navigation currently
+use base101's global frame/topic contract and require an empty namespace.
+If mapping is disabled but navigation is enabled, an external stack must provide
+`/map` and `map -> odom`. `mock` does not start mapping or navigation.
+The inherited Nav2 footprint describes the chassis; raised arms and tools are
+not represented as a dynamic whole-robot navigation footprint.
+
+Turning-slip diagnostics can be run separately from the live simulation:
+
+```bash
+./scripts/manage.sh exec /opt/handy101-checks/bin/python checks/check_odometry_physics.py
+```
+
+This compares integrated wheel encoders with a separate floating-base physics
+model for straight, turning and curved motions. MuJoCo ground-truth odometry is
+used for validation only; mapping consumes the wheel/IMU EKF estimate.
+The MuJoCo drive uses a measured `wheel_separation_multiplier` of 5.5 to
+compensate for skid-steer understeer while preserving base101's geometric wheel
+spacing. Straight, turning and curved motion tests calibrate this setting;
+changes to wheel contacts, friction or payload may require recalibration.
+
+```bash
+./scripts/manage.sh exec python3 checks/check_odometry_runtime.py --drive
+```
+
+The live diagnostic drives reverse straight/curved segments away from the kitchen
+prep table, then a full turn. It compares raw and fused odometry against ground
+truth, checks lidar timestamps, and independently checks the SLAM map pose when
+available. Residual translational wheel slip is expected: the lidar corrects it
+through `map -> odom`, while the IMU prevents encoder slip from corrupting yaw.
+
 ## Joint sliders
 
 Open **Joint sliders** in rosboard. The panel includes the two lifts, head tilt,

@@ -1,7 +1,8 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 <!-- Control ledger: a single system owns the complete simulated assembly.
- Base wheel interface declarations remain imported from base101. The overlay
+ Wheel joint names and velocity interfaces follow base101's published
+ chassis.mujoco.ros2control; declarations here join the single assembly system. The overlay
  owns 2 independent prismatic lift axes (m), 2 prefixed 6-axis arms (rad), their
  right motor-driven tool (rad), passive PGGripper sliders (m), and head tilt (rad). Position + velocity feedback
  comes from the selected backend, never a second mock tool system in MuJoCo.
@@ -11,7 +12,13 @@
  outside this simulation configuration. Default joint limits mirror the source
  descriptions. These are inherited simulation ranges, not hardware calibration.
 -->
-  <xacro:include filename="$(find base101_description)/urdf/wheel_interfaces.xacro"/>
+  <xacro:macro name="handy_wheel_interface" params="name">
+    <joint name="${name}">
+      <command_interface name="velocity"/>
+      <state_interface name="position"/>
+      <state_interface name="velocity"/>
+    </joint>
+  </xacro:macro>
   <xacro:macro name="handy_position_interface" params="name lower upper">
     <joint name="${name}">
       <command_interface name="position">
@@ -76,7 +83,10 @@
           <state_interface name="linear_acceleration.x"/><state_interface name="linear_acceleration.y"/><state_interface name="linear_acceleration.z"/>
         </sensor>
       </xacro:if>
-      <xacro:base101_wheel_interfaces/>
+      <xacro:handy_wheel_interface name="front_left_wheel_joint"/>
+      <xacro:handy_wheel_interface name="front_right_wheel_joint"/>
+      <xacro:handy_wheel_interface name="back_left_wheel_joint"/>
+      <xacro:handy_wheel_interface name="back_right_wheel_joint"/>
       <xacro:handy_position_interface name="left_lift_joint" lower="0" upper="$(arg left_lift_travel)"/>
       <xacro:handy_position_interface name="right_lift_joint" lower="0" upper="$(arg right_lift_travel)"/>
       <xacro:handy_position_interface name="head_camera_tilt_joint" lower="$(arg head_tilt_lower)" upper="$(arg head_tilt_upper)"/>

@@ -31,7 +31,8 @@ def main():
         prefix = Path(td)
         markers = prefix / "share" / "ament_index" / "resource_index" / "packages"
         markers.mkdir(parents=True)
-        for workspace in (ROOT, ROOT.parent / "base101", ROOT.parent / "mod101"):
+        for workspace in (ROOT, Path("/opt/handy101_dependencies"),
+                          ROOT.parent / "base101", ROOT.parent / "mod101"):
             for manifest in (workspace / "src").rglob("package.xml"):
                 name = ET.parse(manifest).getroot().findtext("name")
                 share = prefix / "share" / name

@@ -65,6 +65,16 @@ def build(context):
                       if side + "_arm_" + name in joints]
         for mode in ("_controller", "_position_controller"):
             overlay[side + "_arm" + mode]["ros__parameters"]["joints"] = list(arm_joints)
+    # When base101's EKF owns odom TF, keep raw wheel odometry as its input.
+    if backend == "mujoco":
+        # Four-wheel skid steering needs a wider effective track than the
+        # geometric rim spacing. Measured against floating-base physics at
+        # 0.4 rad/s turns and 0.1 m/s, 0.3 rad/s curves; geometry stays unchanged.
+        overlay["diff_drive_controller"] = {
+            "ros__parameters": {"wheel_separation_multiplier": 5.5}}
+    if arg("fused_odometry").lower() == "true":
+        overlay.setdefault("diff_drive_controller", {"ros__parameters": {}})[
+            "ros__parameters"]["enable_odom_tf"] = False
     # Separate ROS node parameter dictionaries retain the controller names.
     config = [
         str(Path(get_package_share_directory("base101_control")) / "config/controllers.sim.yaml"),
@@ -170,6 +180,7 @@ def generate_launch_description():
         [
             DeclareLaunchArgument("rosboard", default_value="true", choices=["true", "false"]),
             DeclareLaunchArgument("rosboard_port", default_value="8888"),
+            DeclareLaunchArgument("fused_odometry", default_value="false", choices=["true", "false"]),
             DeclareLaunchArgument("backend", default_value="mock", choices=["mock", "mujoco"]),
             DeclareLaunchArgument(
                 "control_mode", default_value="trajectory", choices=["trajectory", "position"]
